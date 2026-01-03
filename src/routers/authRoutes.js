@@ -12,6 +12,8 @@ import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
   getCurrentUserController,
   loginUserController,
+  logoutController,
+  refreshController,
   registerUserController,
 } from '../controllers/authControllers.js';
 
@@ -30,6 +32,10 @@ router.post(
   validateBody(loginUserSchema),
   ctrlWrapper(loginUserController),
 );
+
+router.post('/logout', ctrlWrapper(logoutController));
+
+router.post('/refresh', ctrlWrapper(refreshController));
 
 router.get('/currentUser', authenticate, getCurrentUserController);
 

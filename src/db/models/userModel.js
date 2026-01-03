@@ -15,6 +15,11 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    local: {
+      type: String,
+      required: false,
+      enum: ['Linha 1', 'Linha 2', 'Linha 3'],
+    },
   },
   {
     timestamps: true,
