@@ -48,7 +48,8 @@ export const logoutController = async (req, res) => {
 };
 
 export const refreshController = async (req, res) => {
-  const { accessToken, user } = await refreshService(req.body);
+  const actualRefreshToken = req.cookies.refreshToken;
+  const { accessToken, user } = await refreshService(actualRefreshToken);
 
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
