@@ -19,4 +19,3 @@ export const initMongoDB = async () => {
   }
 };
 
-// mongodb+srv://jarik13a_db_user:X8l6FvB8EOrmJ2jC@cluster0.mc49c4m.mongodb.net/productionLog?retryWrites=true&w=majority
