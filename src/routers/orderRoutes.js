@@ -9,6 +9,11 @@ import {
   updateOrderController,
 } from '../controllers/orderControllers.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import {
+  createOrderSchema,
+  updateOrderSchema,
+} from '../validation/orderValidation.js';
 
 const router = Router();
 
@@ -16,8 +21,17 @@ router.get('/', ctrlWrapper(getAllOrdersController));
 
 router.get('/:orderId', isValidId, ctrlWrapper(getOrderByIdController));
 
-router.post('/', ctrlWrapper(createOrderController));
+router.post(
+  '/',
+  validateBody(createOrderSchema),
+  ctrlWrapper(createOrderController),
+);
 
-router.patch('/:orderId', isValidId, ctrlWrapper(updateOrderController));
+router.patch(
+  '/:orderId',
+  isValidId,
+  validateBody(updateOrderSchema),
+  ctrlWrapper(updateOrderController),
+);
 
 router.delete('/:orderId', isValidId, ctrlWrapper(deleteOrderController));

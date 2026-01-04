@@ -1,10 +1,24 @@
 import createHttpError from 'http-errors';
 
 import { OrdersCollection } from '../db/models/orderModel.jsx';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-export const getAllOrdersService = async () => {
-  const orders = await OrdersCollection.find();
-  return orders;
+export const getAllOrdersService = async ({ page, perPage }) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+
+  const ordersQuery = await OrdersCollection.find();
+  const ordersCount = await OrdersCollection.find()
+    .merge(ordersQuery)
+    .countDocuments();
+
+  const orders = await ordersQuery.skip(skip).limit(limit).exec();
+  const paginationData = calculatePaginationData(ordersCount, page, perPage);
+
+  return {
+    orders,
+    ...paginationData,
+  };
 };
 
 export const getOrderByIdService = async (orderId) => {

@@ -5,9 +5,12 @@ import {
   getOrderByIdService,
   updateOrderService,
 } from '../services/orderServices.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 
 export const getAllOrdersController = async (req, res) => {
-  const orders = await getAllOrdersService();
+  const { page, perPage } = parsePaginationParams(req.query);
+
+  const orders = await getAllOrdersService({ page, perPage });
 
   res.status(200).json({
     message: 'Successfully found orders!',
