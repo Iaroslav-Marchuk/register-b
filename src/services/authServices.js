@@ -29,18 +29,13 @@ export const loginUserService = async ({ email, password, local }) => {
     throw createHttpError(401, 'Invalid email or password!');
   }
 
-  if (local) {
-    user.local = local;
-    await user.save();
-  }
-
   const accessTokenValidUntil = ACCESS_TOKEN_EXP / 1000;
-  const accessToken = jwt.sign({ userId: user._id }, secretKey, {
+  const accessToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
     expiresIn: accessTokenValidUntil,
   });
 
   const refreshTokenValidUntil = REFRESH_TOKEN_EXP / 1000;
-  const refreshToken = jwt.sign({ userId: user._id }, secretKey, {
+  const refreshToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
     expiresIn: refreshTokenValidUntil,
   });
 
@@ -51,7 +46,7 @@ export const loginUserService = async ({ email, password, local }) => {
       userId: user._id,
       name: user.name,
       email: user.email,
-      local: user.local,
+      local: local,
     },
   };
 };
@@ -64,7 +59,9 @@ export const refreshService = async (actualRefreshToken) => {
   const user = await UsersCollection.findById(decoded.userId);
   if (!user) throw createHttpError(401, 'Not authorized');
 
-  const newAccessToken = jwt.sign({ userId: user._id }, secretKey, {
+  const local = decoded.local;
+
+  const newAccessToken = jwt.sign({ userId: user._id, local }, secretKey, {
     expiresIn: ACCESS_TOKEN_EXP,
   });
 
@@ -74,7 +71,7 @@ export const refreshService = async (actualRefreshToken) => {
       userId: user._id,
       name: user.name,
       email: user.email,
-      local: user.local,
+      local,
     },
   };
 };

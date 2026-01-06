@@ -2,8 +2,9 @@ import { Schema, model } from 'mongoose';
 
 const orderSchema = new Schema(
   {
-    operator: {
-      type: String,
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     local: {
@@ -53,7 +54,7 @@ const orderSchema = new Schema(
     },
     notes: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {

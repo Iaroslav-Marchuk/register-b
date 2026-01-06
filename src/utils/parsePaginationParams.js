@@ -4,7 +4,7 @@ function parseNumber(number, defaultValue) {
 
   const parsedNumber = parseInt(number);
   if (Number.isNaN(parsedNumber) === true) return defaultValue;
-  return parseNumber;
+  return parsedNumber;
 }
 
 export function parsePaginationParams(query) {

@@ -1,0 +1,96 @@
+[
+  {
+    "operator": "Yaroslav",
+    "local": "Linha 1",
+    "ep": 1201,
+    "client": "Client A",
+    "order": { "total": 100, "completed": 20, "m2": 45.5 },
+    "butylLot": "B-102",
+    "silicaLot": "S-88",
+    "polysulfideLot": { "white": "PW-12", "black": "PB-09" },
+    "notes": "First batch"
+  },
+  {
+    "operator": "Yaroslav",
+    "local": "Linha 2",
+    "ep": 1202,
+    "client": "Client B",
+    "order": { "total": 80, "completed": 80, "m2": 38.2 },
+    "butylLot": "B-103",
+    "silicaLot": "S-89",
+    "polysulfideLot": { "white": "PW-13" },
+    "notes": "Completed"
+  },
+  {
+    "operator": "Ana",
+    "local": "Linha 3",
+    "ep": 1203,
+    "client": "Client C",
+    "order": { "total": 150, "completed": 60, "m2": 72.1 },
+    "silicaLot": "S-90",
+    "notes": "In progress"
+  },
+  {
+    "operator": "Pedro",
+    "local": "Linha 1",
+    "ep": 1204,
+    "client": "Client D",
+    "order": { "total": 200, "completed": 0, "m2": 95.0 },
+    "butylLot": "B-104",
+    "notes": "New order"
+  },
+  {
+    "operator": "Ana",
+    "local": "Linha 2",
+    "ep": 1205,
+    "client": "Client E",
+    "order": { "total": 60, "completed": 10, "m2": 29.4 },
+    "polysulfideLot": { "black": "PB-10" },
+    "notes": "Waiting materials"
+  },
+  {
+    "operator": "Yaroslav",
+    "local": "Linha 3",
+    "ep": 1206,
+    "client": "Client F",
+    "order": { "total": 90, "completed": 45, "m2": 41.7 },
+    "butylLot": "B-105",
+    "silicaLot": "S-91",
+    "notes": "Half done"
+  },
+  {
+    "operator": "Pedro",
+    "local": "Linha 1",
+    "ep": 1207,
+    "client": "Client G",
+    "order": { "total": 110, "completed": 110, "m2": 53.6 },
+    "notes": "Delivered"
+  },
+  {
+    "operator": "Ana",
+    "local": "Linha 2",
+    "ep": 1208,
+    "client": "Client H",
+    "order": { "total": 75, "completed": 30, "m2": 34.9 },
+    "butylLot": "B-106",
+    "polysulfideLot": { "white": "PW-14", "black": "PB-11" },
+    "notes": "Quality check"
+  },
+  {
+    "operator": "Yaroslav",
+    "local": "Linha 3",
+    "ep": 1209,
+    "client": "Client I",
+    "order": { "total": 130, "completed": 90, "m2": 61.3 },
+    "silicaLot": "S-92",
+    "notes": "Almost done"
+  },
+  {
+    "operator": "Pedro",
+    "local": "Linha 1",
+    "ep": 1210,
+    "client": "Client J",
+    "order": { "total": 50, "completed": 5, "m2": 22.8 },
+    "notes": "Urgent"
+  }
+]
