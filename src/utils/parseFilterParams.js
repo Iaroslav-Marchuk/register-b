@@ -1,3 +1,5 @@
+import { buildDayRangeQuery } from './normalizeData.js';
+
 function parseNumber(value) {
   const isString = typeof value === 'string';
   if (!isString) return;
@@ -15,18 +17,20 @@ function parseText(value) {
   return value.trim();
 }
 
-function parseDate(value) {
-  if (!value) return undefined;
-  const date = new Date(value);
-  return isNaN(value.getTime()) ? undefined : date;
-}
+// function parseDate(value) {
+//   if (!value) return undefined;
+//   const date = new Date(value);
+//   if (isNaN(date.getTime())) return undefined;
+
+//   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+// }
 
 export function parseFilterParams(query) {
   const { ep, client, createdAt, local } = query;
 
   const parsedEP = parseNumber(ep);
   const parsedClient = parseText(client);
-  const parsedDate = parseDate(createdAt);
+  const parsedDate = createdAt ? buildDayRangeQuery(createdAt) : undefined;
   const parsedLocal = parseText(local);
 
   return {

@@ -4,7 +4,7 @@ import { OrdersCollection } from '../db/models/orderModel.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../constants/constants.js';
 
-export const getAllOrdersService = async ({
+export const getOrdersService = async ({
   page = 1,
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
@@ -14,33 +14,21 @@ export const getAllOrdersService = async ({
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const ordersQuery = OrdersCollection.find();
+  const mongoFilter = {};
 
-  if (filter.ep) {
-    ordersQuery.where('ep').equals(filter.ep);
-  }
+  if (filter.ep) mongoFilter.ep = filter.ep;
+  if (filter.client) mongoFilter.client = filter.client;
+  if (filter.local) mongoFilter.local = filter.local;
+  if (filter.createdAt) mongoFilter.createdAt = filter.createdAt;
 
-  if (filter.client) {
-    ordersQuery.where('client').equals(filter.client);
-  }
+  const ordersCount = await OrdersCollection.countDocuments(mongoFilter);
 
-  if (filter.createdAt) {
-    ordersQuery.where('createdAt').equals(filter.createdAt);
-  }
-
-  if (filter.local) {
-    ordersQuery.where('local').equals(filter.local);
-  }
-
-  const ordersCount = await OrdersCollection.find()
-    .merge(ordersQuery)
-    .countDocuments();
-
-  const orders = await ordersQuery
+  const orders = await OrdersCollection.find(mongoFilter)
     .sort({ [sortBy]: sortOrder })
     .skip(skip)
     .limit(limit)
-    .exec();
+    .lean();
+
   const paginationData = calculatePaginationData(ordersCount, page, perPage);
 
   return {
@@ -48,16 +36,6 @@ export const getAllOrdersService = async ({
     ...paginationData,
   };
 };
-
-// export const getOrderByIdService = async (orderId) => {
-//   const order = await OrdersCollection.findById(orderId);
-
-//   if (!order) {
-//     throw createHttpError(404, 'Order not found!');
-//   }
-
-//   return order;
-// };
 
 export const createOrderService = async (payload) => {
   const newOrder = await OrdersCollection.create(payload);
@@ -77,11 +55,12 @@ export const updateOrderService = async (orderId, payload) => {
 };
 
 export const deleteOrderService = async (orderId) => {
-  const orderToDelete = await OrdersCollection.findByIdAndDelete(orderId);
-
+  const orderToDelete = await OrdersCollection.findById(orderId);
   if (!orderToDelete) {
     throw createHttpError(404, 'Order not found!');
   }
 
-  return;
+  await OrdersCollection.findByIdAndDelete(orderId);
+
+  return orderToDelete;
 };

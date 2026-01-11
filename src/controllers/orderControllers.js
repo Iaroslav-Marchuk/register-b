@@ -1,10 +1,10 @@
 import {
   createOrderService,
   deleteOrderService,
-  getAllOrdersService,
-  // getOrderByIdService,
+  getOrdersService,
   updateOrderService,
 } from '../services/orderServices.js';
+import { buildDayRangeQuery } from '../utils/normalizeData.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
@@ -14,7 +14,7 @@ export const getAllOrdersController = async (req, res) => {
   const { sortBy, sortOrder } = parseSortParams(req.query);
   const filter = parseFilterParams(req.query);
 
-  const orders = await getAllOrdersService({
+  const orders = await getOrdersService({
     page,
     perPage,
     sortBy,
@@ -24,19 +24,33 @@ export const getAllOrdersController = async (req, res) => {
 
   res.status(200).json({
     message: 'Successfully found orders!',
-    orders,
+    ...orders,
   });
 };
 
-// export const getOrderByIdController = async (req, res) => {
-//   const { orderId } = req.params;
-//   const order = await getOrderByIdService(orderId);
+export const getTodayOrdersController = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
 
-//   res.status(200).json({
-//     message: `Successfully found order with id: ${orderId}`,
-//     order,
-//   });
-// };
+  const filter = {
+    createdAt: buildDayRangeQuery(new Date()),
+    location: req.user.location,
+    userId: req.user._id,
+  };
+
+  const orders = await getOrdersService({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filter,
+  });
+
+  res.status(200).json({
+    message: 'Successfully found orders!',
+    ...orders,
+  });
+};
 
 export const createOrderController = async (req, res) => {
   const payload = {
@@ -72,5 +86,6 @@ export const deleteOrderController = async (req, res) => {
 
   res.status(200).json({
     message: 'Order deleted successfully',
+    orderId,
   });
 };

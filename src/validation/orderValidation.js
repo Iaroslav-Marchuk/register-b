@@ -20,7 +20,7 @@ export const createOrderSchema = Joi.object({
 });
 
 export const updateOrderSchema = Joi.object({
-  ep: Joi.number().integer().positive().min(1).max(15000),
+  ep: Joi.number().integer().positive().min(1),
   client: Joi.string(),
   order: Joi.object({
     total: Joi.number().integer().positive().min(1),
