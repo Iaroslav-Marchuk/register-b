@@ -72,6 +72,8 @@ export const updateOrderController = async (req, res) => {
   const { orderId } = req.params;
   const payload = req.body;
 
+  console.log('Received payload:', payload);
+
   const updatedOrder = await updateOrderService(orderId, payload);
 
   res.status(200).json({

@@ -28,11 +28,11 @@ export const updateOrderSchema = Joi.object({
     m2: Joi.number().positive(),
   }),
 
-  butylLot: Joi.string(),
-  silicaLot: Joi.string(),
+  butylLot: Joi.string().allow(''),
+  silicaLot: Joi.string().allow(''),
   polysulfideLot: {
-    white: Joi.string(),
-    black: Joi.string(),
+    white: Joi.string().allow(''),
+    black: Joi.string().allow(''),
   },
-  notes: Joi.string().min(1).max(40),
+  notes: Joi.string().min(1).max(40).allow(''),
 }).min(1);
