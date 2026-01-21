@@ -29,6 +29,10 @@ const orderSchema = new Schema(
         type: Number,
         required: true,
       },
+      missed: {
+        type: Number,
+        required: false,
+      },
       m2: {
         type: Number,
         required: true,

@@ -34,7 +34,7 @@ export const getTodayOrdersController = async (req, res) => {
 
   const filter = {
     createdAt: buildDayRangeQuery(new Date()),
-    location: req.user.location,
+    location: req.user.local,
     userId: req.user._id,
   };
 
@@ -53,13 +53,17 @@ export const getTodayOrdersController = async (req, res) => {
 };
 
 export const createOrderController = async (req, res) => {
+  const { order } = req.body;
+
+  const diff = order.total - order.completed;
+  order.missed = diff > 0 ? diff : null;
+
   const payload = {
     ...req.body,
     owner: req.user._id,
     local: req.user.local,
   };
 
-  console.log(payload);
   const newOrder = await createOrderService(payload);
 
   res.status(201).json({
@@ -70,9 +74,15 @@ export const createOrderController = async (req, res) => {
 
 export const updateOrderController = async (req, res) => {
   const { orderId } = req.params;
-  const payload = req.body;
+  const payload = { ...req.body };
 
-  console.log('Received payload:', payload);
+  if (
+    payload.order.total !== undefined &&
+    payload.order.completed !== undefined
+  ) {
+    const diff = payload.order.total - payload.order.completed;
+    payload.order.missed = diff > 0 ? diff : null;
+  }
 
   const updatedOrder = await updateOrderService(orderId, payload);
 

@@ -17,14 +17,6 @@ function parseText(value) {
   return value.trim();
 }
 
-// function parseDate(value) {
-//   if (!value) return undefined;
-//   const date = new Date(value);
-//   if (isNaN(date.getTime())) return undefined;
-
-//   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-// }
-
 export function parseFilterParams(query) {
   const { ep, client, createdAt, local } = query;
 

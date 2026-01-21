@@ -17,7 +17,9 @@ export const getOrdersService = async ({
   const mongoFilter = {};
 
   if (filter.ep) mongoFilter.ep = filter.ep;
-  if (filter.client) mongoFilter.client = filter.client;
+  if (filter.client) {
+    mongoFilter.client = { $regex: filter.client, $options: 'i' };
+  }
   if (filter.local) mongoFilter.local = filter.local;
   if (filter.createdAt) mongoFilter.createdAt = filter.createdAt;
 
@@ -31,9 +33,35 @@ export const getOrdersService = async ({
 
   const paginationData = calculatePaginationData(ordersCount, page, perPage);
 
+  const [stats] = await OrdersCollection.aggregate([
+    { $match: mongoFilter },
+    {
+      $group: {
+        _id: null,
+        totalCompleted: { $sum: '$order.completed' },
+        totalM2: { $sum: '$order.m2' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalCompleted: 1,
+        totalM2: 1,
+        ratio: {
+          $cond: [
+            { $eq: ['$totalCompleted', 0] },
+            0,
+            { $divide: ['$totalM2', '$totalCompleted'] },
+          ],
+        },
+      },
+    },
+  ]);
+
   return {
     orders,
     ...paginationData,
+    ...stats,
   };
 };
 

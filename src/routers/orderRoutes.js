@@ -16,6 +16,7 @@ import {
   updateOrderSchema,
 } from '../validation/orderValidation.js';
 import { authenticate } from '../middlewares/authenticante.js';
+import { validateNumbers } from '../middlewares/validateNumbers.js';
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.post(
   '/',
   authenticate,
   validateBody(createOrderSchema),
+  validateNumbers,
   ctrlWrapper(createOrderController),
 );
 
@@ -37,6 +39,7 @@ router.patch(
   authenticate,
   isValidId,
   validateBody(updateOrderSchema),
+  validateNumbers,
   ctrlWrapper(updateOrderController),
 );
 
