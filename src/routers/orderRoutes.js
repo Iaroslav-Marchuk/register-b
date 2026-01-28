@@ -3,20 +3,24 @@ import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
 import {
   createOrderController,
+  createRecoveryOrderController,
   deleteOrderController,
+  editOrderController,
+  existOrderController,
   getAllOrdersController,
   getTodayOrdersController,
-  // getOrderByIdController,
   updateOrderController,
+  // getOrderByIdController,
 } from '../controllers/orderControllers.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import {
   createOrderSchema,
+  createRecoveryOrderSchema,
+  editOrderSchema,
   updateOrderSchema,
 } from '../validation/orderValidation.js';
 import { authenticate } from '../middlewares/authenticante.js';
-import { validateNumbers } from '../middlewares/validateNumbers.js';
 
 const router = Router();
 
@@ -26,21 +30,35 @@ router.get('/today', authenticate, ctrlWrapper(getTodayOrdersController));
 
 // router.get('/:orderId', isValidId, ctrlWrapper(getOrderByIdController));
 
+router.post('/existOrder', ctrlWrapper(existOrderController));
+
 router.post(
   '/',
   authenticate,
   validateBody(createOrderSchema),
-  validateNumbers,
   ctrlWrapper(createOrderController),
+);
+
+router.post(
+  '/recovery',
+  authenticate,
+  validateBody(createRecoveryOrderSchema),
+  ctrlWrapper(createRecoveryOrderController),
+);
+
+router.post(
+  '/update',
+  authenticate,
+  validateBody(updateOrderSchema),
+  ctrlWrapper(updateOrderController),
 );
 
 router.patch(
   '/:orderId',
   authenticate,
   isValidId,
-  validateBody(updateOrderSchema),
-  validateNumbers,
-  ctrlWrapper(updateOrderController),
+  validateBody(editOrderSchema),
+  ctrlWrapper(editOrderController),
 );
 
 router.delete(

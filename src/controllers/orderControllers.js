@@ -1,6 +1,9 @@
 import {
   createOrderService,
+  createRecoveryOrderService,
   deleteOrderService,
+  editOrderService,
+  existOrderService,
   getOrdersService,
   updateOrderService,
 } from '../services/orderServices.js';
@@ -52,43 +55,69 @@ export const getTodayOrdersController = async (req, res) => {
   });
 };
 
+export const existOrderController = async (req, res) => {
+  const { ep } = req.body;
+  const { isExist, order } = await existOrderService({ ep });
+  res.status(200).json({
+    message: 'Successfully checked order EP!',
+    isExist,
+    order,
+  });
+};
+
 export const createOrderController = async (req, res) => {
-  const { order } = req.body;
-
-  const diff = order.total - order.completed;
-  order.missed = diff > 0 ? diff : null;
-
   const payload = {
     ...req.body,
     owner: req.user._id,
     local: req.user.local,
   };
 
-  const newOrder = await createOrderService(payload);
+  const { order } = await createOrderService(payload);
 
   res.status(201).json({
     message: 'Successfully created new order!',
-    newOrder,
+    order,
+  });
+};
+
+export const createRecoveryOrderController = async (req, res) => {
+  const payload = {
+    ...req.body,
+    owner: req.user._id,
+    local: req.user.local,
+  };
+
+  const { order } = await createRecoveryOrderService(payload);
+
+  res.status(201).json({
+    message: 'Successfully created recovery order!',
+    order,
   });
 };
 
 export const updateOrderController = async (req, res) => {
+  const payload = {
+    ...req.body,
+    owner: req.user._id,
+    local: req.user.local,
+  };
+
+  const { order } = await updateOrderService(payload);
+  res.status(201).json({
+    message: 'Successfully updated order!',
+    order,
+  });
+};
+
+export const editOrderController = async (req, res) => {
   const { orderId } = req.params;
   const payload = { ...req.body };
 
-  if (
-    payload.order.total !== undefined &&
-    payload.order.completed !== undefined
-  ) {
-    const diff = payload.order.total - payload.order.completed;
-    payload.order.missed = diff > 0 ? diff : null;
-  }
-
-  const updatedOrder = await updateOrderService(orderId, payload);
+  const { order } = await editOrderService(orderId, payload);
 
   res.status(200).json({
     message: 'Successfully updated order!',
-    updatedOrder,
+    order,
   });
 };
 

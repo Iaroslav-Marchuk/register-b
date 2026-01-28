@@ -2,42 +2,67 @@ import { Schema, model } from 'mongoose';
 
 const orderSchema = new Schema(
   {
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+    ep: {
+      type: Number,
+      required: true,
+      index: true,
+    },
+
+    client: {
+      type: String,
       required: true,
     },
+
+    totalItems: {
+      type: Number,
+      required: true,
+    },
+    totalM2: {
+      type: Number,
+      required: true,
+    },
+
+    completedItems: {
+      type: Number,
+      required: true,
+    },
+    completedM2: {
+      type: Number,
+      required: true,
+    },
+
+    missedItems: {
+      type: Number,
+      required: false,
+    },
+    missedM2: {
+      type: Number,
+      required: false,
+    },
+
+    type: {
+      type: String,
+      enum: ['created', 'continued', 'recovered'],
+      default: 'created',
+    },
+
+    isFinal: {
+      type: Boolean,
+      default: false,
+    },
+
     local: {
       type: String,
       enum: ['Linha 1', 'Linha 2', 'Linha 3'],
       required: true,
     },
-    ep: {
-      type: Number,
+
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
-    client: {
-      type: String,
-      required: true,
-    },
-    order: {
-      total: {
-        type: Number,
-        required: true,
-      },
-      completed: {
-        type: Number,
-        required: true,
-      },
-      missed: {
-        type: Number,
-        required: false,
-      },
-      m2: {
-        type: Number,
-        required: true,
-      },
-    },
+
     butylLot: {
       type: String,
       required: false,
