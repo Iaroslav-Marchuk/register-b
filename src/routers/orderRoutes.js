@@ -30,7 +30,7 @@ router.get('/today', authenticate, ctrlWrapper(getTodayOrdersController));
 
 // router.get('/:orderId', isValidId, ctrlWrapper(getOrderByIdController));
 
-router.post('/existOrder', ctrlWrapper(existOrderController));
+router.post('/existOrder', authenticate, ctrlWrapper(existOrderController));
 
 router.post(
   '/',

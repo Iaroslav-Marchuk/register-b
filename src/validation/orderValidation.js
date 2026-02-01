@@ -1,59 +1,3 @@
-// import Joi from 'joi';
-
-// export const createOrderSchema = Joi.object({
-//   ep: Joi.number().integer().positive().min(1).max(15000).required(),
-//   client: Joi.string().required(),
-//   order: Joi.object({
-//     total: Joi.number().integer().positive().min(1).required(),
-//     completed: Joi.number().integer().min(1).max(Joi.ref('total')).required(),
-//     m2: Joi.number().positive().required(),
-//   }).required(),
-
-//   butylLot: Joi.string().allow(''),
-//   silicaLot: Joi.string().allow(''),
-//   polysulfideLot: Joi.object({
-//     white: Joi.string().allow(''),
-//     black: Joi.string().allow(''),
-//   }),
-//   notes: Joi.string().min(1).max(40).allow(''),
-// });
-
-// export const updateOrderSchema = Joi.object({
-//   ep: Joi.number().integer().positive().min(1).max(15000).required(),
-//   client: Joi.string().required(),
-//   order: Joi.object({
-//     total: Joi.number().integer().positive().min(1),
-//     completed: Joi.number().integer().min(1).required(),
-//     m2: Joi.number().positive().required(),
-//   }).required(),
-
-//   butylLot: Joi.string().allow(''),
-//   silicaLot: Joi.string().allow(''),
-//   polysulfideLot: Joi.object({
-//     white: Joi.string().allow(''),
-//     black: Joi.string().allow(''),
-//   }),
-//   notes: Joi.string().min(1).max(40).allow(''),
-// });
-
-// export const editOrderSchema = Joi.object({
-//   ep: Joi.number().integer().positive().min(1),
-//   client: Joi.string(),
-//   order: Joi.object({
-//     total: Joi.number().integer().positive().min(1),
-//     completed: Joi.number().integer().positive().min(1),
-//     m2: Joi.number().positive(),
-//   }),
-
-//   butylLot: Joi.string().allow(''),
-//   silicaLot: Joi.string().allow(''),
-//   polysulfideLot: {
-//     white: Joi.string().allow(''),
-//     black: Joi.string().allow(''),
-//   },
-//   notes: Joi.string().min(1).max(40).allow(''),
-// }).min(1);
-
 import Joi from 'joi';
 
 export const createOrderSchema = Joi.object({
@@ -76,7 +20,7 @@ export const createOrderSchema = Joi.object({
     black: Joi.string().allow(''),
   }),
 
-  notes: Joi.string().min(1).max(40).allow(''),
+  checkedNotes: Joi.array().items(Joi.string()).default([]),
 });
 
 export const createRecoveryOrderSchema = Joi.object({
@@ -96,7 +40,7 @@ export const createRecoveryOrderSchema = Joi.object({
     black: Joi.string().allow(''),
   }),
 
-  notes: Joi.string().min(1).max(40).allow(''),
+  checkedNotes: Joi.array().items(Joi.string()).default([]),
 });
 
 export const updateOrderSchema = Joi.object({
@@ -119,7 +63,7 @@ export const updateOrderSchema = Joi.object({
     black: Joi.string().allow(''),
   }),
 
-  notes: Joi.string().min(1).max(40).allow(''),
+  checkedNotes: Joi.array().items(Joi.string()).default([]),
 });
 
 export const editOrderSchema = Joi.object({
@@ -141,5 +85,5 @@ export const editOrderSchema = Joi.object({
     black: Joi.string().allow(''),
   }),
 
-  notes: Joi.string().min(1).max(40).allow(''),
+  checkedNotes: Joi.array().items(Joi.string()).default([]),
 });

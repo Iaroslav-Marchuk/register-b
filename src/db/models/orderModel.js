@@ -81,8 +81,8 @@ const orderSchema = new Schema(
         required: false,
       },
     },
-    notes: {
-      type: String,
+    checkedNotes: {
+      type: [String],
       required: false,
     },
   },

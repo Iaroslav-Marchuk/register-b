@@ -87,6 +87,21 @@ export const createOrderService = async (payload) => {
     throw createHttpError(400, 'Order with this EP already exists!');
   }
 
+  if (completedItems > totalItems || completedM2 > totalM2) {
+    throw createHttpError(400, 'Completed values cannot exceed total');
+  }
+
+  if (
+    (completedItems === totalItems && completedM2 !== totalM2) ||
+    (completedM2 === totalM2 && completedItems !== totalItems)
+  ) {
+    throw createHttpError(400, 'Items and M2 must be completed together');
+  }
+
+  if (completedItems < totalItems && completedM2 >= totalM2) {
+    throw createHttpError(400, 'M2 cannot be completed before items');
+  }
+
   const diffItems = totalItems - completedItems;
   const diffM2 = totalM2 - completedM2;
 
@@ -112,22 +127,43 @@ export const createOrderService = async (payload) => {
 };
 
 export const createRecoveryOrderService = async (payload) => {
-  console.log('🚀 ~ createRecoveryOrderService ~ payload:', payload);
-
   const { ep, completedItems, completedM2, ...rest } = payload;
 
-  const lastOrder = await OrdersCollection.findOne({ ep }).sort({
+  const lastProductinOrder = await OrdersCollection.findOne({
+    ep,
+    isFinal: true,
+    type: { $in: ['created', 'continued'] },
+  }).sort({
     createdAt: -1,
   });
 
-  if (!lastOrder) {
+  if (!lastProductinOrder) {
     throw createHttpError(404, 'No existing order with this EP found');
   }
 
-  if (!lastOrder.isFinal) {
+  if (!lastProductinOrder.isFinal) {
     throw createHttpError(
       400,
       'Cannot create recovery before finishing production order',
+    );
+  }
+
+  const firstProductionOrder = await OrdersCollection.findOne({
+    ep,
+    type: 'created',
+  }).sort({ createdAt: 1 });
+
+  if (!firstProductionOrder) {
+    throw createHttpError(404, 'Original order not found');
+  }
+
+  if (
+    completedItems > firstProductionOrder.totalItems ||
+    completedM2 > firstProductionOrder.totalM2
+  ) {
+    throw createHttpError(
+      400,
+      'Completed values cannot exceed total items or M2 from original order',
     );
   }
 
@@ -136,6 +172,7 @@ export const createRecoveryOrderService = async (payload) => {
     completedItems,
     completedM2,
     type: 'recovered',
+    isFinal: true,
     ...rest,
   });
 
@@ -158,6 +195,39 @@ export const updateOrderService = async (payload) => {
       400,
       'Cannot update already finished production order',
     );
+  }
+
+  if (
+    completedItems > lastExistOrder.missedItems ||
+    completedM2 > lastExistOrder.missedM2
+  ) {
+    throw createHttpError(
+      400,
+      'Completed values cannot exceed remaining amounts',
+    );
+  }
+
+  if (!lastExistOrder.isFinal) {
+    if (
+      completedItems === lastExistOrder.missedItems &&
+      completedM2 !== lastExistOrder.missedM2
+    ) {
+      throw createHttpError(400, 'Invalid final completion (M2)');
+    }
+
+    if (
+      completedM2 === lastExistOrder.missedM2 &&
+      completedItems !== lastExistOrder.missedItems
+    ) {
+      throw createHttpError(400, 'Invalid final completion (Items)');
+    }
+
+    if (
+      completedItems < lastExistOrder.missedItems &&
+      completedM2 >= lastExistOrder.missedM2
+    ) {
+      throw createHttpError(400, 'M2 cannot be completed before items');
+    }
   }
 
   const pendingDiffItems = lastExistOrder.missedItems - completedItems;
@@ -188,19 +258,10 @@ export const editOrderService = async (orderId, payload) => {
   const oldOrder = await OrdersCollection.findById(orderId);
   if (!oldOrder) throw createHttpError(404, 'Order not found');
 
-  // const existOrder = await OrdersCollection.findOne({
-  //   ep: payload.ep,
-  //   _id: { $ne: orderId },
-  // });
-
-  // if (existOrder) {
-  //   throw createHttpError(400, 'Order with this EP already exists!');
-  // }
-
-  if (payload.ep !== undefined) {
+  if (payload.ep !== undefined && Number(payload.ep) !== oldOrder.ep) {
+    const epNumber = Number(payload.ep);
     const existOrder = await OrdersCollection.findOne({
-      ep: payload.ep,
-      _id: { $ne: orderId },
+      ep: epNumber,
     });
 
     if (existOrder) {
@@ -208,31 +269,107 @@ export const editOrderService = async (orderId, payload) => {
     }
   }
 
+  const { ep } = oldOrder;
+
+  const lastOrderForEp = await OrdersCollection.findOne({ ep }).sort({
+    createdAt: -1,
+  });
+
+  const isLast = lastOrderForEp._id.toString() === orderId;
+  // if (!isLast && !(oldOrder.type === 'created' && oldOrder.isFinal)) {
+  //   throw createHttpError(400, 'Cannot edit intermediate production step');
+  // }
+
+  if (!isLast && oldOrder.type !== 'recovered') {
+    throw createHttpError(400, 'Cannot edit intermediate production step');
+  }
+
   const updateData = { ...payload };
 
-  const totalItems = payload.totalItems;
-  const completedItems = payload.completedItems;
-  const totalM2 = payload.totalM2;
-  const completedM2 = payload.completedM2;
+  if (oldOrder.type !== 'recovered') {
+    const totalItems = payload.totalItems;
+    const completedItems = payload.completedItems ?? oldOrder.completedItems;
+    const totalM2 = payload.totalM2;
+    const completedM2 = payload.completedM2 ?? oldOrder.completedM2;
 
-  if (
-    totalItems !== undefined &&
-    completedItems !== undefined &&
-    totalM2 !== undefined &&
-    completedM2 !== undefined
-  ) {
-    const diffItems = totalItems - completedItems;
-    const diffM2 = totalM2 - completedM2;
+    const previousOrders = await OrdersCollection.find({
+      ep,
+      _id: { $ne: orderId },
+    });
 
-    updateData.missedItems = diffItems > 0 ? diffItems : 0;
-    updateData.missedM2 = diffM2 > 0 ? diffM2 : 0;
-    updateData.isFinal =
-      updateData.missedItems === 0 && updateData.missedM2 === 0 ? true : false;
+    const totalCompletedBefore = previousOrders.reduce(
+      (sum, o) => sum + o.completedItems,
+      0,
+    );
+    const totalCompletedM2Before = previousOrders.reduce(
+      (sum, o) => sum + o.completedM2,
+      0,
+    );
 
-    updateData.totalItems = totalItems;
-    updateData.completedItems = completedItems;
-    updateData.totalM2 = totalM2;
-    updateData.completedM2 = completedM2;
+    const remainingItems = totalItems - totalCompletedBefore;
+    const remainingM2 = totalM2 - totalCompletedM2Before;
+
+    if (completedItems > remainingItems) {
+      throw createHttpError(
+        400,
+        'Cannot complete more than remaining items (including previous completions)',
+      );
+    }
+
+    if (completedM2 > remainingM2) {
+      throw createHttpError(
+        400,
+        'Cannot complete more than remaining M2 (including previous completions)',
+      );
+    }
+
+    if (completedItems > totalItems || completedM2 > totalM2) {
+      throw createHttpError(400, 'Completed values cannot exceed total');
+    }
+
+    if (
+      completedItems < oldOrder.missedItems &&
+      completedM2 >= oldOrder.missedM2
+    ) {
+      throw createHttpError(400, 'M2 cannot be completed before items');
+    }
+
+    if (
+      (completedItems === totalItems && completedM2 !== totalM2) ||
+      (completedM2 === totalM2 && completedItems !== totalItems)
+    ) {
+      throw createHttpError(400, 'Items and M2 must be completed together');
+    }
+
+    if (completedItems < totalItems && completedM2 >= totalM2) {
+      throw createHttpError(400, 'M2 cannot be completed before items');
+    }
+
+    if (completedItems < remainingItems && completedM2 >= remainingM2) {
+      throw createHttpError(
+        400,
+        'M2 cannot be completed before items are finished',
+      );
+    }
+
+    if (
+      totalItems !== undefined &&
+      completedItems !== undefined &&
+      totalM2 !== undefined &&
+      completedM2 !== undefined
+    ) {
+      updateData.missedItems = remainingItems - completedItems;
+      updateData.missedM2 = remainingM2 - completedM2;
+      updateData.isFinal =
+        updateData.missedItems === 0 && updateData.missedM2 === 0
+          ? true
+          : false;
+
+      updateData.totalItems = totalItems;
+      updateData.completedItems = completedItems;
+      updateData.totalM2 = totalM2;
+      updateData.completedM2 = completedM2;
+    }
   }
 
   const editedOrder = await OrdersCollection.findByIdAndUpdate(
@@ -250,6 +387,33 @@ export const deleteOrderService = async (orderId) => {
   const orderToDelete = await OrdersCollection.findById(orderId);
   if (!orderToDelete) {
     throw createHttpError(404, 'Order not found!');
+  }
+
+  const { ep } = orderToDelete;
+
+  const lastOrderForEp = await OrdersCollection.findOne({ ep }).sort({
+    createdAt: -1,
+  });
+
+  const isLast = lastOrderForEp._id.toString() === orderId;
+
+  if (!lastOrderForEp) {
+    throw createHttpError(500, 'Order chain is corrupted');
+  }
+
+  if (lastOrderForEp._id.toString() !== orderId) {
+    throw createHttpError(400, 'Cannot delete intermediate production step');
+  }
+
+  if (
+    !isLast &&
+    orderToDelete.type === 'created' &&
+    orderToDelete.isFinal === false
+  ) {
+    throw createHttpError(
+      400,
+      'Cannot delete non-final initial production order',
+    );
   }
 
   await OrdersCollection.findByIdAndDelete(orderId);
