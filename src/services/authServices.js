@@ -46,7 +46,9 @@ export const loginUserService = async ({ email, password, local }) => {
       userId: user._id,
       name: user.name,
       email: user.email,
-      local: local,
+      local,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   };
 };
@@ -72,11 +74,13 @@ export const refreshService = async (actualRefreshToken) => {
       name: user.name,
       email: user.email,
       local,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   };
 };
 
-export const getCurrentUserService = async (userId) => {
+export const getCurrentUserService = async (userId, local) => {
   const user = await UsersCollection.findById(userId);
 
   if (!user) {
@@ -84,8 +88,88 @@ export const getCurrentUserService = async (userId) => {
   }
 
   return {
-    name: user.name,
-    email: user.email,
-    local: user.local,
+    user: {
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      local,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  };
+};
+
+export const changeLocalService = async (userId, local) => {
+  const user = await UsersCollection.findById(userId);
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+  const accessTokenValidUntil = ACCESS_TOKEN_EXP / 1000;
+  const accessToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
+    expiresIn: accessTokenValidUntil,
+  });
+
+  const refreshTokenValidUntil = REFRESH_TOKEN_EXP / 1000;
+  const refreshToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
+    expiresIn: refreshTokenValidUntil,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      local: local,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  };
+};
+
+export const changePasswordService = async (
+  userId,
+  oldPassword,
+  newPassword,
+  local,
+) => {
+  const user = await UsersCollection.findById(userId);
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const isEqual = await bcrypt.compare(oldPassword, user.password);
+  if (!isEqual) {
+    throw createHttpError(401, 'Invalid password!');
+  }
+
+  const encryptedNewPassword = await bcrypt.hash(newPassword, 10);
+
+  user.password = encryptedNewPassword;
+  await user.save();
+
+  const accessTokenValidUntil = ACCESS_TOKEN_EXP / 1000;
+  const accessToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
+    expiresIn: accessTokenValidUntil,
+  });
+
+  const refreshTokenValidUntil = REFRESH_TOKEN_EXP / 1000;
+  const refreshToken = jwt.sign({ userId: user._id, local: local }, secretKey, {
+    expiresIn: refreshTokenValidUntil,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      local: local,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
   };
 };

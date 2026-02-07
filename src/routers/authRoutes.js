@@ -11,6 +11,8 @@ import {
 } from '../validation/userValidation.js';
 
 import {
+  changelocalController,
+  changePasswordController,
   getCurrentUserController,
   loginUserController,
   logoutController,
@@ -37,5 +39,13 @@ router.post('/logout', ctrlWrapper(logoutController));
 router.post('/refresh', ctrlWrapper(refreshController));
 
 router.get('/currentUser', authenticate, getCurrentUserController);
+
+router.patch('/changeLocal', authenticate, changelocalController);
+
+router.patch(
+  '/changePassword',
+  authenticate,
+  ctrlWrapper(changePasswordController),
+);
 
 export default router;

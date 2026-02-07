@@ -276,9 +276,6 @@ export const editOrderService = async (orderId, payload) => {
   });
 
   const isLast = lastOrderForEp._id.toString() === orderId;
-  // if (!isLast && !(oldOrder.type === 'created' && oldOrder.isFinal)) {
-  //   throw createHttpError(400, 'Cannot edit intermediate production step');
-  // }
 
   if (!isLast && oldOrder.type !== 'recovered') {
     throw createHttpError(400, 'Cannot edit intermediate production step');

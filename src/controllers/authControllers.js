@@ -1,5 +1,7 @@
 import { ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP } from '../constants/constants.js';
 import {
+  changeLocalService,
+  changePasswordService,
   getCurrentUserService,
   loginUserService,
   refreshService,
@@ -66,9 +68,76 @@ export const refreshController = async (req, res) => {
 };
 
 export const getCurrentUserController = async (req, res) => {
-  const currentUser = await getCurrentUserService(req.user._id);
+  const { userId, local } = req.user;
+  const user = await getCurrentUserService(userId, local);
+
   res.status(200).json({
     message: 'Current user finded!',
-    currentUser,
+    user,
+  });
+};
+
+export const changelocalController = async (req, res) => {
+  const { local } = req.body;
+  const userId = req.user._id;
+
+  const { accessToken, refreshToken, user } = await changeLocalService(
+    userId,
+    local,
+  );
+
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,
+    maxAge: ACCESS_TOKEN_EXP,
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    maxAge: REFRESH_TOKEN_EXP,
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+  });
+
+  res.status(200).json({
+    user,
+    message: 'Local is successfully changed!',
+  });
+};
+
+export const changePasswordController = async (req, res) => {
+  const userId = req.user._id;
+  const { oldPassword, newPassword } = req.body;
+  const local = req.user.local;
+
+  const { accessToken, refreshToken, user } = await changePasswordService(
+    userId,
+    oldPassword,
+    newPassword,
+    local,
+  );
+
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,
+    maxAge: ACCESS_TOKEN_EXP,
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    maxAge: REFRESH_TOKEN_EXP,
+    sameSite: 'None',
+    secure: true,
+    path: '/',
+  });
+
+  res.status(200).json({
+    user,
+    message: 'Password is successfully changed!',
   });
 };

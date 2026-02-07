@@ -20,8 +20,6 @@ export const authenticate = async (req, res, next) => {
       return next(createHttpError(401, 'User not found!'));
     }
 
-    // req.user = { ...user, local: decoded.local };
-
     req.user = {
       _id: user._id.toString(),
       name: user.name,
