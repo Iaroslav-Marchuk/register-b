@@ -9,6 +9,7 @@ import {
   existOrderController,
   getAllOrdersController,
   getTodayOrdersController,
+  getUserDailyActivityController,
   updateOrderController,
   // getOrderByIdController,
 } from '../controllers/orderControllers.js';
@@ -66,6 +67,12 @@ router.delete(
   authenticate,
   isValidId,
   ctrlWrapper(deleteOrderController),
+);
+
+router.get(
+  '/activity/:year',
+  authenticate,
+  ctrlWrapper(getUserDailyActivityController),
 );
 
 export default router;

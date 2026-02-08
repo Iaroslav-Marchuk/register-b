@@ -5,6 +5,7 @@ import {
   editOrderService,
   existOrderService,
   getOrdersService,
+  getUserDailyActivityService,
   updateOrderService,
 } from '../services/orderServices.js';
 import { buildDayRangeQuery } from '../utils/normalizeData.js';
@@ -128,5 +129,16 @@ export const deleteOrderController = async (req, res) => {
   res.status(200).json({
     message: 'Order deleted successfully',
     orderId,
+  });
+};
+
+export const getUserDailyActivityController = async (req, res) => {
+  const userId = req.user._id;
+  const { year } = req.params;
+
+  const activity = await getUserDailyActivityService(userId, year);
+  res.status(200).json({
+    message: 'Successfully fetched user activity!',
+    activity,
   });
 };

@@ -92,4 +92,6 @@ const orderSchema = new Schema(
   },
 );
 
+orderSchema.index({ owner: 1, createdAt: 1 });
+
 export const OrdersCollection = model('Order', orderSchema);

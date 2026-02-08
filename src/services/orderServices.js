@@ -3,6 +3,7 @@ import createHttpError from 'http-errors';
 import { OrdersCollection } from '../db/models/orderModel.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../constants/constants.js';
+import mongoose from 'mongoose';
 
 export const getOrdersService = async ({
   page = 1,
@@ -416,4 +417,46 @@ export const deleteOrderService = async (orderId) => {
   await OrdersCollection.findByIdAndDelete(orderId);
 
   return orderToDelete;
+};
+
+export const getUserDailyActivityService = async (userId, year) => {
+  const selectedYear = Number(year) || new Date().getFullYear();
+
+  const start = new Date(selectedYear, 0, 1);
+  const end = new Date(selectedYear + 1, 0, 1);
+
+  const activity = await OrdersCollection.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+        $or: [
+          { createdAt: { $gte: start, $lt: end } },
+          { updatedAt: { $gte: start, $lt: end } },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: '%Y-%m-%d',
+            date: '$createdAt',
+          },
+        },
+        totalCompletedItems: { $sum: '$completedItems' },
+        totalCompletedM2: { $sum: '$completedM2' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        date: '$_id',
+        totalCompletedItems: 1,
+        totalCompletedM2: 1,
+      },
+    },
+    { $sort: { date: 1 } },
+  ]);
+
+  return activity;
 };
