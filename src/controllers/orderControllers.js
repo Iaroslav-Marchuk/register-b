@@ -4,6 +4,7 @@ import {
   deleteOrderService,
   editOrderService,
   existOrderService,
+  getFullStatisticForYearService,
   getOrdersService,
   getUserDailyActivityService,
   updateOrderService,
@@ -134,11 +135,29 @@ export const deleteOrderController = async (req, res) => {
 
 export const getUserDailyActivityController = async (req, res) => {
   const userId = req.user._id;
-  const { year } = req.params;
+  const year = Number(req.params.year);
+
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    return res.status(400).json({ message: 'Invalid year' });
+  }
 
   const activity = await getUserDailyActivityService(userId, year);
   res.status(200).json({
     message: 'Successfully fetched user activity!',
     activity,
+  });
+};
+
+export const getFullStatisticForYearController = async (req, res) => {
+  const year = Number(req.params.year);
+
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    return res.status(400).json({ message: 'Invalid year' });
+  }
+
+  const statistics = await getFullStatisticForYearService(year);
+  res.status(200).json({
+    message: 'Statistics fetched successfully!',
+    statistics,
   });
 };

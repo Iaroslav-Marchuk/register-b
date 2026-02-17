@@ -30,6 +30,7 @@ export const getOrdersService = async ({
     .sort({ [sortBy]: sortOrder })
     .skip(skip)
     .limit(limit)
+    .populate('owner', 'name')
     .lean();
 
   const paginationData = calculatePaginationData(ordersCount, page, perPage);
@@ -459,4 +460,73 @@ export const getUserDailyActivityService = async (userId, year) => {
   ]);
 
   return activity;
+};
+
+export const getFullStatisticForYearService = async (year) => {
+  const selectedYear = Number(year);
+
+  const start = new Date(selectedYear, 0, 1);
+  const end = new Date(selectedYear + 1, 0, 1);
+
+  const stats = await OrdersCollection.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: start, $lt: end },
+        completedM2: { $gt: 0 },
+      },
+    },
+
+    {
+      $group: {
+        _id: {
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+              timezone: 'Europe/Lisbon',
+            },
+          },
+          local: '$local',
+        },
+
+        totalM2: { $sum: '$completedM2' },
+      },
+    },
+
+    {
+      $group: {
+        _id: '$_id.date',
+
+        l1: {
+          $sum: {
+            $cond: [{ $eq: ['$_id.local', 'Linha 1'] }, '$totalM2', 0],
+          },
+        },
+        l2: {
+          $sum: {
+            $cond: [{ $eq: ['$_id.local', 'Linha 2'] }, '$totalM2', 0],
+          },
+        },
+        l3: {
+          $sum: {
+            $cond: [{ $eq: ['$_id.local', 'Linha 3'] }, '$totalM2', 0],
+          },
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 0,
+        date: '$_id',
+        l1: { $round: ['$l1', 2] },
+        l2: { $round: ['$l2', 2] },
+        l3: { $round: ['$l3', 2] },
+      },
+    },
+
+    { $sort: { date: 1 } },
+  ]);
+
+  return stats;
 };

@@ -8,6 +8,7 @@ import {
   editOrderController,
   existOrderController,
   getAllOrdersController,
+  getFullStatisticForYearController,
   getTodayOrdersController,
   getUserDailyActivityController,
   updateOrderController,
@@ -73,6 +74,12 @@ router.get(
   '/activity/:year',
   authenticate,
   ctrlWrapper(getUserDailyActivityController),
+);
+
+router.get(
+  '/statistics/:year',
+  authenticate,
+  ctrlWrapper(getFullStatisticForYearController),
 );
 
 export default router;
