@@ -29,10 +29,8 @@ const possibleNotes = [
 function generateOrdersForEP(date, user, ep, line) {
   const orders = [];
 
-  // ===== TARGET COMPLETED M2 (250-450 per line per day) =====
   const totalItems = randomInt(10, 150);
 
-  // 80% шанс, що замовлення буде повністю завершене
   let completedItems;
   let completedM2;
 
@@ -55,7 +53,7 @@ function generateOrdersForEP(date, user, ep, line) {
     Math.random() > 0.7
       ? (() => {
           const shuffled = [...possibleNotes].sort(() => 0.5 - Math.random());
-          const count = Math.floor(Math.random() * 2) + 1; // 1 або 2 елементи
+          const count = Math.floor(Math.random() * 2) + 1;
           return shuffled.slice(0, count);
         })()
       : [];
@@ -89,7 +87,6 @@ function generateOrdersForEP(date, user, ep, line) {
   let lastCompleted = completedItems;
   let lastDate = date;
 
-  // ===== CONTINUED =====
   if (!isFinal && Math.random() > 0.5) {
     const additional = randomInt(1, totalItems - lastCompleted);
     const newCompleted = lastCompleted + additional;
@@ -120,7 +117,6 @@ function generateOrdersForEP(date, user, ep, line) {
     lastDate = contDate;
   }
 
-  // ===== RECOVERED =====
   if (orders[orders.length - 1].isFinal && Math.random() > 0.7) {
     const recDate = new Date(lastDate.getTime() + 86400000);
 
@@ -170,18 +166,12 @@ async function seed() {
     let currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
-      // const day = currentDate.getDay();
-      // if (day === 0 || day === 6) {
-      //   currentDate.setDate(currentDate.getDate() + 1);
-      //   continue; // пропускаємо суботу та неділю
-      // }
-
-      currentDate.setHours(0, 0, 0, 0); // обнуляємо час
+      currentDate.setHours(0, 0, 0, 0);
 
       const day = currentDate.getDay();
       if (day === 0 || day === 6) {
         currentDate.setDate(currentDate.getDate() + 1);
-        continue; // пропускаємо суботу та неділю
+        continue;
       }
 
       const usedEPs = new Set();
