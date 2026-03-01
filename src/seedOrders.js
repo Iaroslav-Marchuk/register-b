@@ -24,6 +24,7 @@ const possibleNotes = [
   'Comprido (>3500mm)',
   'Decalado',
   'Comutável',
+  'Reposição',
 ];
 
 function generateOrdersForEP(date, user, ep, line) {
