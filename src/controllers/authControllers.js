@@ -22,16 +22,16 @@ export const loginUserController = async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     maxAge: REFRESH_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
@@ -89,16 +89,16 @@ export const changelocalController = async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     maxAge: REFRESH_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
@@ -123,16 +123,16 @@ export const changePasswordController = async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     maxAge: REFRESH_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
