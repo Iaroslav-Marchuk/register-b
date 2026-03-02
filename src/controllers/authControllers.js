@@ -56,8 +56,8 @@ export const refreshController = async (req, res) => {
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXP,
-    sameSite: 'None',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
   });
 
