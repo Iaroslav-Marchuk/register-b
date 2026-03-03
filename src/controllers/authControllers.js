@@ -42,20 +42,36 @@ export const loginUserController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  };
+
   res
-    .clearCookie('accessToken')
-    .clearCookie('refreshToken')
+    .clearCookie('accessToken', cookieOptions)
+    .clearCookie('refreshToken', cookieOptions)
     .status(200)
     .json({ message: 'Logged out successfully' });
 };
 
 export const refreshController = async (req, res) => {
   const actualRefreshToken = req.cookies.refreshToken;
-  const { accessToken, user } = await refreshService(actualRefreshToken);
+  const { accessToken, refreshToken, user } =
+    await refreshService(actualRefreshToken);
 
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXP,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    maxAge: REFRESH_TOKEN_EXP,
     sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     secure: process.env.NODE_ENV === 'production',
     path: '/',

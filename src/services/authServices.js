@@ -63,12 +63,24 @@ export const refreshService = async (actualRefreshToken) => {
 
   const local = decoded.local;
 
+  const accessTokenValidUntil = ACCESS_TOKEN_EXP / 1000;
   const newAccessToken = jwt.sign({ userId: user._id, local }, secretKey, {
-    expiresIn: ACCESS_TOKEN_EXP,
+    expiresIn: accessTokenValidUntil,
   });
+
+  const refreshTokenValidUntil = REFRESH_TOKEN_EXP / 1000;
+  const newRefreshToken = jwt.sign(
+    { userId: user._id, local: local },
+    secretKey,
+    {
+      expiresIn: refreshTokenValidUntil,
+    },
+  );
 
   return {
     accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+
     user: {
       userId: user._id,
       name: user.name,
